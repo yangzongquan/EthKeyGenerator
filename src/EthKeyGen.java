@@ -28,7 +28,12 @@ public class EthKeyGen {
 		}
 	}
     
-    private static void generate() {
+    private static void generateAndPrint() {
+    	String[] keypair = generate();
+    	System.out.println(keypair[0] + ":" + keypair[1]);
+    }
+    
+    public static String[] generate() {
     	KeyPair keyPair = keyPairGen.generateKeyPair();
     	PrivateKey privKey = keyPair.getPrivate();
     	ECPoint pub;
@@ -44,7 +49,7 @@ public class EthKeyGen {
         }
         String hexAddr = Hex.toHexString(ECKey.computeAddress(pub));
         String hexPriv = Hex.toHexString(ByteUtil.bigIntegerToBytes(((BCECPrivateKey) privKey).getD(), 32));
-    	System.out.println(hexPriv + ":" + hexAddr);
+    	return new String[]{hexAddr, hexPriv};
     }
 
     private static final int MIN_SAME = 7;
@@ -64,7 +69,14 @@ public class EthKeyGen {
                 " to produce a subtype of ECPublicKey, found " + pubKey.getClass());
         }
         String hexAddr = Hex.toHexString(ECKey.computeAddress(pub));
-        
+        if (!isGoodAddress(hexAddr, MIN_SAME)) {
+        	return;
+        }
+        String hexPriv = Hex.toHexString(ByteUtil.bigIntegerToBytes(((BCECPrivateKey) privKey).getD(), 32));
+    	System.out.println(hexPriv + ":" + hexAddr + ":" + index);
+    }
+
+    public static boolean isGoodAddress(String hexAddr, int minSame) {
         int length = hexAddr.length();
         boolean good = false;
         char last = 'g';
@@ -78,7 +90,7 @@ public class EthKeyGen {
 			}
 			last = c;
 			// 超过MIN_SAME个字符相同保留
-			if (same >= MIN_SAME) {
+			if (same >= minSame) {
 				good = true;
 				break;
 			}
@@ -88,14 +100,9 @@ public class EthKeyGen {
         		// 快速过滤，优化性能
         		&& (firstChar == '0' || firstChar == '1') 
         		// 保留以“12345678”、“01234567”开头的
-        		&& (hexAddr.startsWith("12345678") || hexAddr.startsWith("01234567"))) {
+        		&& (hexAddr.startsWith("123456789") || hexAddr.startsWith("012345678"))) {
         	good = true;
         }
-        if (!good) {
-        	return;
-        }
-        
-        String hexPriv = Hex.toHexString(ByteUtil.bigIntegerToBytes(((BCECPrivateKey) privKey).getD(), 32));
-    	System.out.println(hexPriv + ":" + hexAddr + ":" + index);
+        return good;
     }
 }

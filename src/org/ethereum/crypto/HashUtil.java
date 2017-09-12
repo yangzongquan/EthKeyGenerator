@@ -17,7 +17,7 @@
  */
 package org.ethereum.crypto;
 
-import org.ethereum.config.SystemProperties;
+//import org.ethereum.config.SystemProperties;
 import org.ethereum.crypto.jce.SpongyCastleProvider;
 import org.ethereum.util.RLP;
 import org.ethereum.util.Utils;
@@ -52,11 +52,14 @@ public class HashUtil {
     private static final MessageDigest sha256digest;
 
     static {
-        SystemProperties props = SystemProperties.getDefault();
+//        SystemProperties props = SystemProperties.getDefault();
         Security.addProvider(SpongyCastleProvider.getInstance());
-        CRYPTO_PROVIDER = Security.getProvider(props.getCryptoProviderName());
-        HASH_256_ALGORITHM_NAME = props.getHash256AlgName();
-        HASH_512_ALGORITHM_NAME = props.getHash512AlgName();
+//        CRYPTO_PROVIDER = Security.getProvider(props.getCryptoProviderName());
+        CRYPTO_PROVIDER = Security.getProvider("SC");
+//        HASH_256_ALGORITHM_NAME = props.getHash256AlgName();
+        HASH_256_ALGORITHM_NAME = "ETH-KECCAK-256";
+//        HASH_512_ALGORITHM_NAME = props.getHash512AlgName();
+        HASH_512_ALGORITHM_NAME = "ETH-KECCAK-512";
         try {
             sha256digest = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
