@@ -21,40 +21,39 @@ public class EthKeyGen {
     private static final Provider provider = SpongyCastleProvider.getInstance();
     private static final KeyPairGenerator keyPairGen = ECKeyPairGenerator.getInstance(provider, secureRandom);
 
-    private static final int MIN_SAME = 5;
+    private static int MIN_SAME = 5;
     
     public static void main(String[] args) {
-    	long total = (args != null && args.length > 0) ? Integer.valueOf(args[0]) : Long.MAX_VALUE;
-    	for (long i = 0; i < total; i++) {
-    		generateGood(i);
+		if (args.length != 3) {
+			System.out.println("Example: $java -jar xx.jar 2 10000 8, 2:number of threads, 10000: max number of key pair every thread('0' represent no limit), 8: min same char");
+			return;
+		}
+
+		final int threads = Integer.valueOf(args[0]);
+		long args1 = Long.valueOf(args[1]);
+		final long maxPerThread = args1 <= 0 ? Long.MAX_VALUE : args1;
+		MIN_SAME = Integer.valueOf(args[2]);
+		
+		for (int i = 0; i < threads; i++) {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					long start = System.currentTimeMillis();
+
+				    SecureRandom secureRandom = new SecureRandom();
+				    Provider provider = SpongyCastleProvider.getInstance();
+				    KeyPairGenerator keyPairGen = ECKeyPairGenerator.getInstance(provider, secureRandom);
+				    
+			    	for (long i = 0; i < maxPerThread; i++) {
+			    		generateGood(keyPairGen);
+					}
+			    	System.out.println("elapse-time:" + (System.currentTimeMillis() - start) + "ms");
+				}
+			}).start();
 		}
 	}
-    
-    private static void generateAndPrint() {
-    	String[] keypair = generate();
-    	System.out.println(keypair[0] + ":" + keypair[1]);
-    }
-    
-    public static String[] generate() {
-    	KeyPair keyPair = keyPairGen.generateKeyPair();
-    	PrivateKey privKey = keyPair.getPrivate();
-    	ECPoint pub;
-    	PublicKey pubKey = keyPair.getPublic();
-        if (pubKey instanceof BCECPublicKey) {
-            pub = ((BCECPublicKey) pubKey).getQ();
-        } else if (pubKey instanceof ECPublicKey) {
-            pub = ECKey.extractPublicKey((ECPublicKey) pubKey);
-        } else {
-            throw new AssertionError(
-                "Expected Provider " + provider.getName() +
-                " to produce a subtype of ECPublicKey, found " + pubKey.getClass());
-        }
-        String hexAddr = Hex.toHexString(ECKey.computeAddress(pub));
-        String hexPriv = Hex.toHexString(ByteUtil.bigIntegerToBytes(((BCECPrivateKey) privKey).getD(), 32));
-    	return new String[]{hexAddr, hexPriv};
-    }
 
-    private static void generateGood(long index) {
+    private static void generateGood(KeyPairGenerator keyPairGen) {
     	KeyPair keyPair = keyPairGen.generateKeyPair();
     	PrivateKey privKey = keyPair.getPrivate();
     	ECPoint pub;
@@ -73,7 +72,26 @@ public class EthKeyGen {
         	return;
         }
         String hexPriv = Hex.toHexString(ByteUtil.bigIntegerToBytes(((BCECPrivateKey) privKey).getD(), 32));
-    	System.out.println(hexPriv + ":" + hexAddr + ":" + index);
+    	System.out.println(hexAddr + ":" + hexPriv);
+    }
+
+    public static String[] generate() {
+    	KeyPair keyPair = keyPairGen.generateKeyPair();
+    	PrivateKey privKey = keyPair.getPrivate();
+    	ECPoint pub;
+    	PublicKey pubKey = keyPair.getPublic();
+        if (pubKey instanceof BCECPublicKey) {
+            pub = ((BCECPublicKey) pubKey).getQ();
+        } else if (pubKey instanceof ECPublicKey) {
+            pub = ECKey.extractPublicKey((ECPublicKey) pubKey);
+        } else {
+            throw new AssertionError(
+                "Expected Provider " + provider.getName() +
+                " to produce a subtype of ECPublicKey, found " + pubKey.getClass());
+        }
+        String hexAddr = Hex.toHexString(ECKey.computeAddress(pub));
+        String hexPriv = Hex.toHexString(ByteUtil.bigIntegerToBytes(((BCECPrivateKey) privKey).getD(), 32));
+    	return new String[]{hexAddr, hexPriv};
     }
 
     public static boolean isGoodAddress(String hexAddr, int minSame) {
