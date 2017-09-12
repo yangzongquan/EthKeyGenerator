@@ -21,8 +21,6 @@ package org.ethereum.crypto;
 import org.ethereum.crypto.jce.SpongyCastleProvider;
 import org.ethereum.util.RLP;
 import org.ethereum.util.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spongycastle.crypto.Digest;
 import org.spongycastle.crypto.digests.RIPEMD160Digest;
 import org.spongycastle.util.encoders.Hex;
@@ -37,8 +35,6 @@ import static java.util.Arrays.copyOfRange;
 import static org.ethereum.util.ByteUtil.EMPTY_BYTE_ARRAY;
 
 public class HashUtil {
-
-    private static final Logger LOG = LoggerFactory.getLogger(HashUtil.class);
 
     public static final byte[] EMPTY_DATA_HASH;
     public static final byte[] EMPTY_LIST_HASH;
@@ -63,7 +59,8 @@ public class HashUtil {
         try {
             sha256digest = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
-            LOG.error("Can't initialize HashUtils", e);
+        	System.err.println("Can't initialize HashUtils" + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException(e); // Can't happen.
         }
         EMPTY_DATA_HASH = sha3(EMPTY_BYTE_ARRAY);
@@ -87,7 +84,7 @@ public class HashUtil {
             digest.update(input);
             return digest.digest();
         } catch (NoSuchAlgorithmException e) {
-            LOG.error("Can't find such algorithm", e);
+            e.printStackTrace();;
             throw new RuntimeException(e);
         }
 
@@ -101,7 +98,7 @@ public class HashUtil {
             digest.update(input2, 0, input2.length);
             return digest.digest();
         } catch (NoSuchAlgorithmException e) {
-            LOG.error("Can't find such algorithm", e);
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -124,7 +121,7 @@ public class HashUtil {
             digest.update(input, start, length);
             return digest.digest();
         } catch (NoSuchAlgorithmException e) {
-            LOG.error("Can't find such algorithm", e);
+            e.printStackTrace();;
             throw new RuntimeException(e);
         }
     }
@@ -136,7 +133,7 @@ public class HashUtil {
             digest.update(input);
             return digest.digest();
         } catch (NoSuchAlgorithmException e) {
-            LOG.error("Can't find such algorithm", e);
+            e.printStackTrace();;
             throw new RuntimeException(e);
         }
     }

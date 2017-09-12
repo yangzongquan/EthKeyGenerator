@@ -20,7 +20,9 @@ public class EthKeyGen {
     private static final SecureRandom secureRandom = new SecureRandom();
     private static final Provider provider = SpongyCastleProvider.getInstance();
     private static final KeyPairGenerator keyPairGen = ECKeyPairGenerator.getInstance(provider, secureRandom);
- 
+
+    private static final int MIN_SAME = 5;
+    
     public static void main(String[] args) {
     	long total = (args != null && args.length > 0) ? Integer.valueOf(args[0]) : Long.MAX_VALUE;
     	for (long i = 0; i < total; i++) {
@@ -52,8 +54,6 @@ public class EthKeyGen {
     	return new String[]{hexAddr, hexPriv};
     }
 
-    private static final int MIN_SAME = 7;
-    
     private static void generateGood(long index) {
     	KeyPair keyPair = keyPairGen.generateKeyPair();
     	PrivateKey privKey = keyPair.getPrivate();

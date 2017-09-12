@@ -39,8 +39,6 @@ import org.ethereum.crypto.jce.ECKeyPairGenerator;
 import org.ethereum.crypto.jce.ECSignatureFactory;
 import org.ethereum.crypto.jce.SpongyCastleProvider;
 import org.ethereum.util.ByteUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.spongycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
 import org.spongycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
@@ -86,7 +84,6 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
-import javax.annotation.Nullable;
 import javax.crypto.KeyAgreement;
 
 import static org.ethereum.util.BIUtil.isLessThan;
@@ -107,7 +104,6 @@ import static org.ethereum.util.ByteUtil.bigIntegerToBytes;
  * bitcoinj on GitHub</a>.
  */
 public class ECKey implements Serializable {
-    private static final Logger logger = LoggerFactory.getLogger(ECKey.class);
 
     /**
      * The parameters of the secp256k1 curve that Ethereum uses.
@@ -223,7 +219,7 @@ public class ECKey implements Serializable {
      *
      * All private key operations will use the provider.
      */
-    public ECKey(Provider provider, @Nullable PrivateKey privKey, ECPoint pub) {
+    public ECKey(Provider provider, PrivateKey privKey, ECPoint pub) {
         this.provider = provider;
 
         if (privKey == null || isECPrivateKey(privKey)) {
@@ -263,7 +259,7 @@ public class ECKey implements Serializable {
      *
      * BouncyCastle will be used as the Java Security Provider
      */
-    public ECKey(@Nullable BigInteger priv, ECPoint pub) {
+    public ECKey(BigInteger priv, ECPoint pub) {
         this(
             SpongyCastleProvider.getInstance(),
             privateKeyFromBigInteger(priv),
@@ -980,7 +976,8 @@ public class ECKey implements Serializable {
         } catch (NullPointerException npe) {
             // Bouncy Castle contains a bug that can cause NPEs given specially crafted signatures.
             // Those signatures are inherently invalid/attack sigs so we just fail them here rather than crash the thread.
-            logger.error("Caught NPE inside bouncy castle", npe);
+	        npe.printStackTrace();
+            System.err.println("Caught NPE inside bouncy castle" + npe.getMessage());
             return false;
         }
     }
@@ -1070,7 +1067,6 @@ public class ECKey implements Serializable {
      * @param messageHash Hash of the data that was signed.
      * @return 65-byte encoded public key
      */
-    @Nullable
     public static byte[] recoverPubBytesFromSignature(int recId, ECDSASignature sig, byte[] messageHash) {
         check(recId >= 0, "recId must be positive");
         check(sig.r.signum() >= 0, "r must be positive");
@@ -1128,7 +1124,6 @@ public class ECKey implements Serializable {
      * @param messageHash Hash of the data that was signed.
      * @return 20-byte address
      */
-    @Nullable
     public static byte[] recoverAddressFromSignature(int recId, ECDSASignature sig, byte[] messageHash) {
         final byte[] pubBytes = recoverPubBytesFromSignature(recId, sig, messageHash);
         if (pubBytes == null) {
@@ -1145,7 +1140,6 @@ public class ECKey implements Serializable {
      * @param messageHash Hash of the data that was signed.
      * @return ECKey
      */
-    @Nullable
     public static ECKey recoverFromSignature(int recId, ECDSASignature sig, byte[] messageHash) {
         final byte[] pubBytes = recoverPubBytesFromSignature(recId, sig, messageHash);
         if (pubBytes == null) {
@@ -1175,7 +1169,6 @@ public class ECKey implements Serializable {
      *
      *  @return  -
      */
-    @Nullable
     public byte[] getPrivKeyBytes() {
         if (privKey == null) {
             return null;

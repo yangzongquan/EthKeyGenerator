@@ -17,7 +17,6 @@
  */
 package org.ethereum.crypto;
 
-import com.google.common.base.Throwables;
 import org.ethereum.ConcatKDFBytesGenerator;
 import org.spongycastle.crypto.AsymmetricCipherKeyPair;
 import org.spongycastle.crypto.BufferedBlockCipher;
@@ -161,9 +160,9 @@ public class ECIESCoder {
             bos.write(cipher);
             return bos.toByteArray();
         } catch (InvalidCipherTextException e) {
-            throw Throwables.propagate(e);
+            throw new IllegalArgumentException(e.getMessage());
         } catch (IOException e) {
-            throw Throwables.propagate(e);
+            throw new IllegalAccessError(e.getMessage());
         }
     }
 
