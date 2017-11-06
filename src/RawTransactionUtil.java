@@ -93,13 +93,17 @@ public class RawTransactionUtil {
 			return;
 		}
 		
-		System.out.println("nonce:" + nonce + ", gasPrice:" + gasPrice 
+		System.out.println("params->\n     nonce:" + nonce + ", gasPrice:" + gasPrice 
 				+ ", gasLimit:" + gasLimit + ", value:" + value + ", netId:" + netId 
 				+ ", hexTo:" + hexTo + ", hexData:" + hexData);
 		
 		String rawData = genRawTransData(hexPrivKey, nonce, gasPrice, gasLimit, hexTo, value, hexData, netId);
 		
-		System.out.println(rawData);
+		System.out.println("rawData: " + rawData);
+		
+//		System.out.println(
+//				genRawTransData("c6f5caefed455c26db5c9ecaed24e5489bc4542215448b0373ff8e0780c39818", 
+//				1, 1000000000, 200000, "7cd8b22babfbf2b1d17e7e1aae54e7b505b1dc72", 1, null, 1));
 	}
 
 	private static void printHelp() {
@@ -139,7 +143,8 @@ public class RawTransactionUtil {
 	public static final String genRawTransData(String hexPrivKey, long nonce, long gasPrice, long gasLimit, String hexTo, long value, String hexData, int netId) {
 	    byte[] senderPrivateKey = Hex.decode(hexPrivKey);
 	    byte[] fromAddress = ECKey.fromPrivate(senderPrivateKey).getAddress();
-	    System.out.println(Hex.toHexString(fromAddress));
+
+	    System.out.println("from: 0x" + Hex.toHexString(fromAddress));
 
 	    Transaction tx = new Transaction(
 	            ByteUtil.bigIntegerToBytes(BigInteger.valueOf(nonce)), // nonce, 通过 geth console -> eth.getTransactionCount(eth.accounts[3]) 获得
